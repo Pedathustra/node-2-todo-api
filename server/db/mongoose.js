@@ -6,3 +6,5 @@ mongoose.Promise = global.Promise;
 //if you save, mongoose will be ready with a connection waiting
 //we're going to use Promise
 mongoose.connect('mongodb://localhost:27017/TodoApp');
+
+module.exports={mongoose};
