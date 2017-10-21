@@ -57,12 +57,6 @@ app.get('/todos/:id', (req,res)=>{
   res.status(400).send();
 }
 
-  //findById to fund
-    //success
-
-        //if no todo - send back 404, with an empty body
-    //error
-        //4000
 });
 
 app.listen(3000, ()=>{
