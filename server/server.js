@@ -1,6 +1,7 @@
 //global vars
-var express = require('express');
-var bodyParser = require('body-parser');
+const _ = require('lodash');
+const express = require('express');
+const  bodyParser = require('body-parser');
 const {ObjectId} = require ('mongodb'); //mongodb returns a lot of useful utility methods, for instance, can determine
 
 
@@ -77,6 +78,35 @@ app.delete('/todos/:id',(req,res)=>{
          res.status(400).send();
     });
 });
+
+app.patch('/todos/:id', (req,res) =>{
+    var id = req.params.id;
+    console.log(req.body);
+    var body = _.pick(req.body, ['text', 'completed']);
+    if(!ObjectId.isValid(id)){
+        return res.status(404).send();
+      }
+      console.log(body);
+    console.log(_.isBoolean(body.completed)  );
+    console.log(body.completed);
+    if(_.isBoolean(body.completed) && body.completed){
+        body.completedAt = new Date().getTime(); // returns int that's ms from 1/1/1970
+    }else {
+      body.completed = false;
+      body.completedAt = null;
+    }
+    console.log(id);
+    Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) =>{
+        if(!todo){
+          return res.status(404).send();
+        }
+        console.log(1);
+        res.send({todo});
+    }).catch((e)=>{
+        return res.status(400).send();
+    })
+});
+
 app.listen(port, ()=>{
   console.log(`Started on port ${port}`)
 });
