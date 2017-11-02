@@ -6,20 +6,15 @@ const express = require('express');
 const  bodyParser = require('body-parser');
 const {ObjectId} = require ('mongodb'); //mongodb returns a lot of useful utility methods, for instance, can determine
 
-
 //local vars
 var {mongoose} = require('./db/mongoose');
-var {Users} = require('./models/user');
+var {User} = require('./models/user');
 var {Todo} = require('./models/todo');
 const port = process.env.PORT;
-
 
 var app = express();
 app.use(bodyParser.json());
 
-//create routes..this is to create todos
-//this is what allows us to capture the request from the user to call the todo.js mongoose goodness
-//to create the actual to do.
 app.post('/todos',(req,res)=>{
   //console.log(req.body); // use this to verify we get the post request
   var todo = new Todo({
@@ -41,7 +36,6 @@ app.get('/todos', (req,res)=>{
   }
 });
 
-// GET /todos/1234 example: localhost:3000/todos/59e377f709b0959440aff47e
 app.get('/todos/:id', (req,res)=>{
   var id= req.params.id;
 
@@ -60,7 +54,6 @@ app.get('/todos/:id', (req,res)=>{
     res.status(400).send();
   }
 });
-
 
 app.delete('/todos/:id',(req,res)=>{
     var id= req.params.id;
@@ -107,6 +100,24 @@ app.patch('/todos/:id', (req,res) =>{
     }).catch((e)=>{
         return res.status(400).send();
     })
+});
+
+
+
+//POST /users
+//x-auth is a custom header
+app.post('/users', (req,res)=>{
+  var body = _.pick(req.body, ['email', 'password']);
+  //var user = new User({email: body.email, password:body.password});
+  var user = new User(body);
+
+  user.save().then(()=>{
+    return user.generateAuthToken(); //returns the promise that we can chain
+  }).then((token)=>{
+      res.header('x-auth',token).send(user);
+  }).catch((e)=>{
+    res.status(400).send(e);
+  })
 });
 
 app.listen(port, ()=>{
