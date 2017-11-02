@@ -59,6 +59,27 @@ UserSchema.methods.generateAuthToken = function () {
     }); // by returning this, we're returning a promise in a chain //this is passed as the success of the next then call
 };
 
+//this turns into a model method as opposed to instance method
+UserSchema.statics.findByToken = function (token){
+    var User = this;
+    var decoded;
+
+    try {
+      decoded = jwt.verify(token, 'abc123');
+    } catch(e){
+        // return new Promise((resolve,reject)=>{
+        //     reject();
+        // })
+        return Promise.reject();
+    }
+    //User.findeOne returns a promise
+    return User.findOne({
+      '_id': decoded._id,
+      'tokens.token': token, // nested object reference requires , which requires single quotes
+      'tokens.access': 'auth'
+    })
+}
+
 var User = mongoose.model('User', UserSchema);
 
 module.exports= {User};

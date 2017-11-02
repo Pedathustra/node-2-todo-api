@@ -8,8 +8,10 @@ const {ObjectId} = require ('mongodb'); //mongodb returns a lot of useful utilit
 
 //local vars
 var {mongoose} = require('./db/mongoose');
-var {User} = require('./models/user');
 var {Todo} = require('./models/todo');
+var {User} = require('./models/user');
+var {authenticate} = require('./middleware/authenticate');
+
 const port = process.env.PORT;
 
 var app = express();
@@ -118,6 +120,13 @@ app.post('/users', (req,res)=>{
   }).catch((e)=>{
     res.status(400).send(e);
   })
+});
+
+
+//this is going to require authentication
+//this will be our first private route
+app.get('/users/me', authenticate, (req, res)=>{
+    res.send(req.user);
 });
 
 app.listen(port, ()=>{
