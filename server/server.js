@@ -46,10 +46,8 @@ app.get('/todos/:id', (req,res)=>{
     }
   Todo.findById(id).then((todo)=>{
       if(todo){
-        console.log('found!');
         res.send(todo);
       }else{
-        console.log('not found!');
         res.status(400).send();
       }
   }), (e)=>{
@@ -78,26 +76,21 @@ app.delete('/todos/:id',(req,res)=>{
 
 app.patch('/todos/:id', (req,res) =>{
     var id = req.params.id;
-    console.log(req.body);
     var body = _.pick(req.body, ['text', 'completed']);
     if(!ObjectId.isValid(id)){
         return res.status(404).send();
       }
-      console.log(body);
-    console.log(_.isBoolean(body.completed)  );
-    console.log(body.completed);
+
     if(_.isBoolean(body.completed) && body.completed){
         body.completedAt = new Date().getTime(); // returns int that's ms from 1/1/1970
     }else {
       body.completed = false;
       body.completedAt = null;
     }
-    console.log(id);
     Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) =>{
         if(!todo){
           return res.status(404).send();
         }
-        console.log(1);
         res.send({todo});
     }).catch((e)=>{
         return res.status(400).send();
