@@ -33,7 +33,6 @@ var UserSchema  = new mongoose.Schema({
       }]
 });
 
-
 //can override methods. Doing this to remove sending back pwd and tokens array
 //this will determine exactly what is sent back when we
 UserSchema.methods.toJSON = function(){
@@ -41,7 +40,6 @@ UserSchema.methods.toJSON = function(){
   var userObject = user.toObject();
   return _.pick(userObject, ['_id' , 'email']);
 }
-
 
 // creates custom method (instance method) // we need a "this" for methods b/c it stores indivual document
 //which means we can say var user = this;
@@ -79,6 +77,27 @@ UserSchema.statics.findByToken = function (token){
       'tokens.access': 'auth'
     })
 }
+
+UserSchema.statics.findByCredentials = function (email, password){
+  var User = this;
+  return User.findOne({email}).then((user)=>{
+      if(!user){
+        return Promise.reject();
+      }
+      //bcrypt doesn't use promises
+      //so we're going to return our own promise
+      return new Promise ((resolve, reject)=>{
+        bcrypt.compare(password, user.password, (err, res)=>{
+            if(res)
+            {
+              resolve(user);
+            } else{
+              reject();
+            }
+        });
+      });
+  });
+};
 
 UserSchema.pre('save', function(next){
   var user = this;

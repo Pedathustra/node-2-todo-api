@@ -97,10 +97,9 @@ app.patch('/todos/:id', (req,res) =>{
     })
 });
 
-
-
 //POST /users
 //x-auth is a custom header
+//use this to sign up new users
 app.post('/users', (req,res)=>{
   var body = _.pick(req.body, ['email', 'password']);
   //var user = new User({email: body.email, password:body.password});
@@ -115,11 +114,25 @@ app.post('/users', (req,res)=>{
   })
 });
 
-
 //this is going to require authentication
 //this will be our first private route
 app.get('/users/me', authenticate, (req, res)=>{
     res.send(req.user);
+});
+
+//POST /users/login {email, password}
+app.post('/users/login', (req, res)=>{
+    var body = _.pick(req.body, ['email', 'password']);
+    //var user = new User(body);
+    //res.send(body);
+    User.findByCredentials(body.email, body.password).then((user)=>{
+        // once we found the credentials and they passed, we generate the auth token and send it back as an x-auth header
+        return user.generateAuthToken().then((token)=>{
+          res.header('x-auth',token).send(user);
+        });
+    }).catch((e)=>{
+        res.send(400).send();
+    });
 });
 
 app.listen(port, ()=>{
