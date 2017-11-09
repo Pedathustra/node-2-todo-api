@@ -113,7 +113,15 @@ UserSchema.pre('save', function(next){
   }
 })
 
-
+UserSchema.methods.removeToken = function (token){
+// $pull is a cool MongoDB method that allows us to remove from an array that meets certain criteria
+  var user = this;
+  return user.update({
+      $pull:{
+        tokens:{ token}
+      }
+  });
+};
 var User = mongoose.model('User', UserSchema);
 
 module.exports= {User};
